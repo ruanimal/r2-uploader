@@ -24,15 +24,14 @@ def upload_r2(s3, content: bytes, bucket: str, key: str):
     return res
 
 @app.post("/upload")
-async def upload(account_id: StrHeader, access_key_id: StrHeader, secret_access_key: StrHeader,
-           bucket: StrHeader, host: Annotated[str, Header()],
+async def upload(account_id: StrForm, access_key_id: StrForm, secret_access_key: StrForm,
+           bucket: StrForm, host: Annotated[str, Header()],
            file: UploadFile = File(...), key_pattern: StrForm = '', url_prefix: StrForm = '',
            ):
-    s3 = get_s3agent(account_id, access_key_id, secret_access_key)
-    now = datetime.now()
     if not key_pattern:
         key_pattern = 'mweb/{year:0>4}-{mon:0>2}-{day:0>2}---{filename}'
 
+    now = datetime.now()
     args = dict(
         year=now.year,
         mon=now.month,
@@ -45,9 +44,14 @@ async def upload(account_id: StrHeader, access_key_id: StrHeader, secret_access_
         url_prefix = f'https://{host}'
 
     content = file.file.read()
-    resp = upload_r2(s3, content, bucket, key)
+    errmsg = ''
+    try:
+        s3 = get_s3agent(account_id, access_key_id, secret_access_key)
+        resp = upload_r2(s3, content, bucket, key)
+    except Exception as e:
+        errmsg = str(e)
     if resp['ResponseMetadata']['HTTPStatusCode'] != 200:
-        return {'code': -1, 'msg': 'upload failed!', 'data': resp}
+        return {'code': -1, 'msg': errmsg, 'data': resp}
 
     res = {
         "code": 0,
