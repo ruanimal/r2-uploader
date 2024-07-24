@@ -1,6 +1,7 @@
 from typing import Union, Annotated
 from botocore.client import Config
 import boto3
+from functools import lru_cache
 
 from datetime import datetime
 from fastapi import FastAPI, Header, Form, UploadFile, Request, File
@@ -10,6 +11,8 @@ app = FastAPI()
 StrForm = Annotated[str, Form()]
 StrHeader = Annotated[str, Header(convert_underscores=False)]
 
+
+@lru_cache(maxsize=100)
 def get_s3agent(account_id, access_key_id, secret_access_key, region='auto'):
     s3 = boto3.client('s3',
                     endpoint_url=f'https://{account_id}.r2.cloudflarestorage.com',

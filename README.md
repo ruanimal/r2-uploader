@@ -21,3 +21,6 @@ args:
 - file: required
 - key_pattern: optional
 - url_prefix: optional
+
+## MWeb Config
+![](mweb-config.jpg)
