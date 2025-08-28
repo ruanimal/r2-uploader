@@ -44,12 +44,16 @@ async def upload(account_id: StrForm, access_key_id: StrForm, secret_access_key:
         hour=now.hour,
         minute=now.minute,
         second=now.second,
-        timestamp=now.timestamp(),
-        stem=stem, 
+        timestamp=int(now.timestamp()),
+        stem=stem,
         ext=ext,
         filename=file.filename,
     )
-    key = key_pattern.format(**{k: v for k, v in args.items() if '{'+k in key_pattern})
+    try:
+        key = key_pattern.format(**{k: v for k, v in args.items() if '{'+k in key_pattern})
+    except KeyError as e:
+        return {'code': -1, 'msg': f'unsupported key pattern variable, {e}', 'data': None}
+
     if not url_prefix:
         url_prefix = f'https://{host}'
 
