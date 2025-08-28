@@ -1,3 +1,4 @@
+import os
 from typing import Union, Annotated
 from botocore.client import Config
 import boto3
@@ -35,11 +36,17 @@ async def upload(account_id: StrForm, access_key_id: StrForm, secret_access_key:
         key_pattern = 'mweb/{year:0>4}-{mon:0>2}-{day:0>2}---{filename}'
 
     now = datetime.now()
+    stem, ext = os.path.splitext(file.filename)
     args = dict(
         year=now.year,
         mon=now.month,
         day=now.day,
         hour=now.hour,
+        minute=now.minute,
+        second=now.second,
+        timestamp=now.timestamp(),
+        stem=stem, 
+        ext=ext,
         filename=file.filename,
     )
     key = key_pattern.format(**{k: v for k, v in args.items() if '{'+k in key_pattern})
